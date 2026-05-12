@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "AppConfig": {
+      "title": "App Config",
+      "description": "Configuration for the funnel app",
+      "type": "object",
+      "properties": {
+        "adminUids": {
+           "type": "array",
+           "items": { "type": "string" },
+           "description": "List of UIDs authorized to edit this config."
+        },
+        "branding": {
+          "type": "object",
+          "properties": {
+            "logoUrl": { "type": "string" },
+            "primaryColor": { "type": "string" },
+            "backgroundColor": { "type": "string" }
+          }
+        },
+        "homepage": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "subtitle": { "type": "string" },
+            "buttonText": { "type": "string" }
+          }
+        },
+        "pixels": {
+          "type": "object",
+          "properties": {
+            "headScripts": { "type": "string" },
+            "bodyScripts": { "type": "string" }
+          }
+        },
+        "questions": {
+          "type": "array"
+        },
+        "results": {
+          "type": "array"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "configurations/{configId}": {
+      "schema": "AppConfig",
+      "description": "Stores the application's configuration"
+    }
+  }
+}

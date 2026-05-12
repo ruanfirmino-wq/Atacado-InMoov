@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    function isValidAppConfig(data) {
+        return data.keys().hasAll(['adminUids', 'branding', 'homepage', 'pixels', 'questions', 'results']) &&
+               data.keys().size() == 6 &&
+               data.adminUids is list &&
+               data.branding is map &&
+               data.homepage is map &&
+               data.pixels is map &&
+               data.questions is list &&
+               data.results is list &&
+               data.branding.keys().hasAll(['logoUrl', 'primaryColor', 'backgroundColor']) &&
+               data.homepage.keys().hasAll(['title', 'subtitle', 'buttonText']) &&
+               data.pixels.keys().hasAll(['headScripts', 'bodyScripts']);
+    }
+
+    match /configurations/{configId} {
+      allow get: if isValidId(configId);
+      allow list: if false;
+      
+      allow create: if isSignedIn() && isValidId(configId) && isValidAppConfig(incoming()) && request.auth.uid in incoming().adminUids;
+      allow update: if isSignedIn() && isValidId(configId) && isValidAppConfig(incoming()) && request.auth.uid in existing().adminUids && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['branding', 'homepage', 'pixels', 'questions', 'results', 'adminUids'])
+      );
+    }
+  }
+}
