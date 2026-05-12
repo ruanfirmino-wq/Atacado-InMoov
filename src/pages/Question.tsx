@@ -16,7 +16,16 @@ export default function QuestionFlow() {
     return <div className="min-h-screen flex items-center justify-center text-xl text-red-500">Pergunta não encontrada</div>;
   }
 
-  const handleOptionClick = (nextPath: string) => {
+  const handleOptionClick = (opt: { nextPath: string, pixelSnippet?: string }) => {
+    if (opt.pixelSnippet) {
+      try {
+        new Function(opt.pixelSnippet)();
+      } catch (e) {
+        console.error('Error executing option pixel snippet', e);
+      }
+    }
+
+    const { nextPath } = opt;
     if (nextPath.startsWith('q_')) {
       navigate(`/q/${nextPath}`);
     } else if (nextPath.startsWith('r_')) {
@@ -53,7 +62,7 @@ export default function QuestionFlow() {
             {question.options.map((opt) => (
               <Button
                 key={opt.id}
-                onClick={() => handleOptionClick(opt.nextPath)}
+                onClick={() => handleOptionClick(opt)}
                 variant="outline"
                 className="w-full text-left justify-start px-6 bg-gray-50 text-gray-800 hover:bg-brand-primary hover:text-white border border-gray-200 transition-all font-normal text-base h-auto py-4 rounded-xl"
               >

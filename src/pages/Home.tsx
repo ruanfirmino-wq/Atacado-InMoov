@@ -9,6 +9,13 @@ export default function Home() {
   if (loading || !config) return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
 
   const startQuiz = () => {
+    if (config.homepage.pixelSnippet) {
+      try {
+        new Function(config.homepage.pixelSnippet)();
+      } catch (e) {
+        console.error('Error executing pixel snippet', e);
+      }
+    }
     if (config.questions.length > 0) {
       navigate(`/q/${config.questions[0].id}`);
     }

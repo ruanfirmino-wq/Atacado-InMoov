@@ -5,7 +5,7 @@ import { handleFirestoreError, OperationType } from './firestoreError';
 
 const CONFIG_DOC_ID = 'main';
 
-const DEFAULT_CONFIG: AppConfig = {
+export const DEFAULT_CONFIG: AppConfig = {
   adminUids: [],
   branding: {
     logoUrl: '',

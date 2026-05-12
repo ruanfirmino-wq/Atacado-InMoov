@@ -2,6 +2,7 @@ export interface Option {
   id: string;
   text: string;
   nextPath: string; // ID of the next question or result
+  pixelSnippet?: string; // JavaScript to execute when option is selected (e.g., fbq('track...'))
 }
 
 export interface Question {
@@ -15,6 +16,7 @@ export interface ResultPage {
   title: string;
   description: string;
   redirectUrl: string;
+  pixelSnippet?: string; // JavaScript to execute when result is shown
 }
 
 export interface AppConfig {
@@ -28,6 +30,7 @@ export interface AppConfig {
     title: string;
     subtitle: string;
     buttonText: string;
+    pixelSnippet?: string; // JavaScript to execute when start button is clicked
   };
   pixels: {
     headScripts: string;

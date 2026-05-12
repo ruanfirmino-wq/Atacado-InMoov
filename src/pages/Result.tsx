@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../ConfigContext';
 import { Button } from '../components/ui/Button';
@@ -6,9 +7,19 @@ export default function Result() {
   const { id } = useParams<{ id: string }>();
   const { config, loading } = useConfig();
 
-  if (loading || !config) return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  const result = config?.results.find((r) => r.id === id);
 
-  const result = config.results.find((r) => r.id === id);
+  useEffect(() => {
+    if (result && result.pixelSnippet) {
+      try {
+        new Function(result.pixelSnippet)();
+      } catch (e) {
+        console.error('Error executing result pixel snippet', e);
+      }
+    }
+  }, [result]);
+
+  if (loading || !config) return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
 
   if (!result) {
     return <div className="min-h-screen flex items-center justify-center">Resultado não encontrado</div>;

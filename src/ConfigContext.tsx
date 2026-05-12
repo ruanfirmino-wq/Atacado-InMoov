@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { AppConfig } from './types';
-import { fetchConfig, updateConfig } from './api';
+import { fetchConfig, updateConfig, DEFAULT_CONFIG } from './api';
 
 interface ConfigContextType {
   config: AppConfig | null;
@@ -21,7 +21,12 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.style.setProperty('--color-primary', data.branding.primaryColor);
         document.documentElement.style.setProperty('--color-bg', data.branding.backgroundColor);
       })
-      .catch(console.error)
+      .catch(err => {
+        console.error('Falha ao carregar as configurações', err);
+        setConfig(DEFAULT_CONFIG);
+        document.documentElement.style.setProperty('--color-primary', DEFAULT_CONFIG.branding.primaryColor);
+        document.documentElement.style.setProperty('--color-bg', DEFAULT_CONFIG.branding.backgroundColor);
+      })
       .finally(() => setLoading(false));
   }, []);
 

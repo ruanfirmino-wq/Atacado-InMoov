@@ -51,6 +51,31 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleOptionPixelChange = (qId: string, optId: string, value: string) => {
+    if (!localConfig) return;
+    const updatedQs = localConfig.questions.map(q => {
+      if (q.id === qId) {
+        return {
+          ...q,
+          options: q.options.map(opt => opt.id === optId ? { ...opt, pixelSnippet: value } : opt)
+        };
+      }
+      return q;
+    });
+    setLocalConfig({ ...localConfig, questions: updatedQs });
+  };
+
+  const handleResultPixelChange = (rId: string, value: string) => {
+    if (!localConfig) return;
+    const updatedRs = localConfig.results.map(r => {
+      if (r.id === rId) {
+        return { ...r, pixelSnippet: value };
+      }
+      return r;
+    });
+    setLocalConfig({ ...localConfig, results: updatedRs });
+  };
+
   if (authLoading) return <div className="min-h-screen flex items-center justify-center p-6 text-xl">Verificando autenticação...</div>;
 
   if (!user || !localConfig) {
@@ -170,12 +195,12 @@ export default function AdminDashboard() {
 
            {activeTab === 'pixels' && (
              <div className="space-y-6">
-               <p className="text-sm text-gray-500">Cole scripts de rastreamento (ex: Pixel do Facebook, Google Analytics) abaixo.</p>
+               <p className="text-sm text-gray-500">Cole scripts de rastreamento principais (ex: Pixel do Facebook, Google Analytics) abaixo. Este código será injetado em todas as páginas.</p>
                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Head Scripts (&lt;head&gt;)</label>
                   <textarea 
-                    className="w-full rounded-md border border-gray-300 p-3 font-mono text-xs h-40"
-                    placeholder="<!-- Add your script here -->"
+                    className="w-full rounded-md border border-gray-300 p-3 font-mono text-xs h-32"
+                    placeholder="<!-- Exemplo do FB Pixel Base -->"
                     value={localConfig.pixels.headScripts} 
                     onChange={e => setLocalConfig({...localConfig, pixels: {...localConfig.pixels, headScripts: e.target.value}})}
                   />
@@ -183,10 +208,61 @@ export default function AdminDashboard() {
                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Body Scripts (&lt;body&gt;)</label>
                   <textarea 
-                    className="w-full rounded-md border border-gray-300 p-3 font-mono text-xs h-40"
+                    className="w-full rounded-md border border-gray-300 p-3 font-mono text-xs h-32"
                     value={localConfig.pixels.bodyScripts} 
                     onChange={e => setLocalConfig({...localConfig, pixels: {...localConfig.pixels, bodyScripts: e.target.value}})}
                   />
+               </div>
+
+               <h3 className="text-xl font-bold mt-10 border-t pt-8">Eventos Específicos (Snippets JS)</h3>
+               <p className="text-sm text-gray-500 mb-4">Adicione códigos JavaScript (ex: <code className="bg-gray-100 p-1 rounded">fbq('track', 'Lead');</code>) para disparar ações.</p>
+               
+               {/* Homepage */}
+               <div className="bg-white p-4 border rounded-xl shadow-sm border-gray-200">
+                 <h4 className="font-semibold text-gray-700 mb-2">Página Inicial (Clique no botão "{localConfig.homepage.buttonText}")</h4>
+                 <Input 
+                   placeholder="ex: fbq('track', 'ViewContent');" 
+                   value={localConfig.homepage.pixelSnippet || ''}
+                   onChange={e => setLocalConfig({...localConfig, homepage: {...localConfig.homepage, pixelSnippet: e.target.value}})}
+                   className="font-mono text-sm"
+                 />
+               </div>
+
+               {/* Questions */}
+               <div className="space-y-4">
+                 <h4 className="font-semibold text-gray-700">Ao selecionar respostas no Funil</h4>
+                 {localConfig.questions.map(q => (
+                   <div key={q.id} className="ml-4 pl-4 border-l-2 border-brand-primary/30 space-y-3 pb-2 pt-1 border-gray-200">
+                     <span className="text-sm font-semibold text-gray-800 block mb-1">{q.text}</span>
+                     {q.options.map(opt => (
+                       <div key={opt.id} className="flex flex-col gap-1 mb-2 bg-gray-50/50 p-2 rounded">
+                         <span className="text-xs text-gray-600 font-medium">↳ {opt.text}</span>
+                         <Input 
+                           placeholder="ex: fbq('trackCustom', 'Interesse');"
+                           value={opt.pixelSnippet || ''}
+                           onChange={e => handleOptionPixelChange(q.id, opt.id, e.target.value)}
+                           className="font-mono text-sm h-8"
+                         />
+                       </div>
+                     ))}
+                   </div>
+                 ))}
+               </div>
+
+               {/* Results */}
+               <div className="space-y-4">
+                 <h4 className="font-semibold text-gray-700">Ao exibir as Páginas de Resultado</h4>
+                 {localConfig.results.map(r => (
+                   <div key={r.id} className="bg-white p-4 border rounded-xl shadow-sm border-gray-200 mb-2">
+                     <span className="text-sm font-semibold text-gray-800 block mb-2">{r.title}</span>
+                     <Input 
+                       placeholder="ex: fbq('track', 'Lead');" 
+                       value={r.pixelSnippet || ''}
+                       onChange={e => handleResultPixelChange(r.id, e.target.value)}
+                       className="font-mono text-sm"
+                     />
+                   </div>
+                 ))}
                </div>
              </div>
            )}
